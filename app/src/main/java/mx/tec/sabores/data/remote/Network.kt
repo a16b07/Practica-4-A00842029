@@ -13,7 +13,7 @@ object Network {
     private const val BASE_URL = "https://startdroid.com/api/"
 
     /** ⚠️ Cambia esto por TU matrícula antes de correr la app. */
-    var alumno: String = "a01234567"
+    var alumno: String = "a00842029"
 
     private val json = Json {
         ignoreUnknownKeys = true
