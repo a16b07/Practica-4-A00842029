@@ -22,6 +22,9 @@ class RestaurantRepository(private val api: SaboresApi = Network.api) {
     suspend fun getMyReviews(): List<Review> =
         api.getMyReviews().map { it.toDomain() }
 
+    suspend fun addReview(restaurantId: Int, stars: Int, comment: String): Review =
+        api.createReview(mx.tec.sabores.data.remote.NewReviewBody(restaurantId, stars, comment)).toDomain()
+
     suspend fun getAllForList(): List<RestaurantEnLista> =
         api.getRestaurants().map { RestaurantEnLista(it.toDomain(), it.toSummary()) }
 }
