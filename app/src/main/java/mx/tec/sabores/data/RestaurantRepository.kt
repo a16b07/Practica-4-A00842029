@@ -25,6 +25,19 @@ class RestaurantRepository(private val api: SaboresApi = Network.api) {
     suspend fun addReview(restaurantId: Int, stars: Int, comment: String): Review =
         api.createReview(mx.tec.sabores.data.remote.NewReviewBody(restaurantId, stars, comment)).toDomain()
 
+    suspend fun editReview(id: Int, stars: Int? = null, comment: String? = null): Review =
+        api.editReview(id, mx.tec.sabores.data.remote.EditReviewBody(stars, comment)).toDomain()
+
+    /** true si se borró, false si el servidor dijo que no era tuya. */
+    suspend fun deleteReview(id: Int): Boolean {
+        val response = api.deleteReview(id)
+        return when (response.code()) {
+            204 -> true
+            403 -> false
+            else -> throw retrofit2.HttpException(response)
+        }
+    }
+
     suspend fun getAllForList(): List<RestaurantEnLista> =
         api.getRestaurants().map { RestaurantEnLista(it.toDomain(), it.toSummary()) }
 }

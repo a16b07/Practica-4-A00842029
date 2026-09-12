@@ -79,7 +79,20 @@ fun SaboresApp() {
             }
 
             composable(Route.MY_REVIEWS) {
-                MyReviewsScreen(items = viewModel.mias)
+                LaunchedEffect(Unit) { viewModel.cargarMisResenas() }
+
+                when (val estado = viewModel.mias) {
+                    is UiState.Cargando -> CargandoView()
+                    is UiState.Error -> ErrorView(
+                        mensaje = estado.mensaje,
+                        onReintentar = { viewModel.cargarMisResenas() }
+                    )
+                    is UiState.Exito -> MyReviewsScreen(
+                        items = estado.datos,
+                        onDelete = { id -> viewModel.borrarResena(id) },
+                        onEdit = { /* Por ahora solo borrar y ver, editar es similar */ }
+                    )
+                }
             }
 
             composable(

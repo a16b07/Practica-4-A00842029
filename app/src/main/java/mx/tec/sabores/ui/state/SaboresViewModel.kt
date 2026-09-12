@@ -37,10 +37,13 @@ class SaboresViewModel(
     var detalle by mutableStateOf<UiState<Detalle>>(UiState.Cargando)
         private set
 
-    var mias by mutableStateOf<List<MyReviewItem>>(emptyList())
+    var mias by mutableStateOf<UiState<List<MyReviewItem>>>(UiState.Cargando)
         private set
 
-    init { cargarRestaurantes() }
+    init {
+        cargarRestaurantes()
+        cargarMisResenas()
+    }
 
     fun cargarRestaurantes() {
         viewModelScope.launch {
@@ -53,6 +56,31 @@ class SaboresViewModel(
         viewModelScope.launch {
             detalle = UiState.Cargando
             detalle = pedir { Detalle(repository.getById(id), repository.getReviews(id)) }
+        }
+    }
+
+    fun cargarMisResenas() {
+        viewModelScope.launch {
+            mias = UiState.Cargando
+            mias = pedir {
+                repository.getMyReviews().mapNotNull { review ->
+                    repository.getById(review.restaurantId).let { MyReviewItem(it.name, review) }
+                }
+            }
+        }
+    }
+
+    fun borrarResena(id: Int) {
+        viewModelScope.launch {
+            try {
+                if (repository.deleteReview(id)) {
+                    cargarMisResenas() // Recargamos la lista
+                }
+            } catch (e: IOException) {
+                // Manejar error de red si es necesario (ej. Toast o Snackbar)
+            } catch (e: HttpException) {
+                // Manejar error de API (ej. 403)
+            }
         }
     }
 
